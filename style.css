@@ -56,6 +56,7 @@ body {
   color: white;
 }
 
+/* close in the sense nearby */
 .close {
   background-color: goldenrod;
   color: white;
@@ -81,18 +82,16 @@ body {
   }
 }
 
-/* visibility hidden means the item is still there and taking up space
-  but just not shown. display: none doesn't take up space */
-.hidden {
-  visibility: hidden;
-}
-
 .info-bar {
   display: flex;
   align-items: center;
   justify-content: center;
+  visibility: hidden;
 }
 
+.show {
+  visibility: visible;
+}
 /* Infinity loop gif */
 .info-bar img{   
   margin-top: 7px;  
