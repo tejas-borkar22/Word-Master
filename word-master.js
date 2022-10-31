@@ -9,7 +9,7 @@ async function init() {
   let done = false
   let isLoading = true
 
-  // Fetching the word of the day from api
+  // Fetching the word of the day from an API
   const response = await fetch("https://words.dev-apis.com/word-of-the-day")
   const responseObj = await response.json()
   const word = responseObj.word.toUpperCase()
@@ -30,7 +30,24 @@ async function init() {
     if(currentGuess.length !== ANSWER_LENGTH)
       return // do nothing as string length < 5
   
-    // Validate the word
+    isLoading = true
+    setLoadingGif(true)
+    // Checking whether guess ia a valid 5 letter word or not
+    const response = await fetch("https://words.dev-apis.com/validate-word", {
+      method : "POST",
+      body : JSON.stringify({ word: currentGuess })
+    });
+    const responseObj = await response.json()
+    const validWord = responseObj.validWord
+    //  const { validWord } = responseObj
+    isLoading = false
+    setLoadingGif(false)
+
+    if(!validWord){
+      markInvalidWord()
+      return
+    }
+
     const guessParts = currentGuess.split("")
     // console.log(guessParts)
     const map = makeMap(wordParts)
@@ -60,11 +77,14 @@ async function init() {
     currentRow++
     // Win or lose logic
     if(currentGuess === word){
-      console.log("You win 🥇")
+      // TODO : Add popups or notifications instead of alerts
+      
+      alert("You win 🥇")
+      document.querySelector(".brand").classList.add("winner")
       done = true
       return
     }else if(currentRow === ROUNDS){
-      console.log(`The word of the day was ${word}`)
+      alert(`The word of the day was ${word}`)
       done = true 
     }
 
@@ -74,6 +94,33 @@ async function init() {
   function backspace(){
     currentGuess = currentGuess.substring(0,currentGuess.length - 1)
     letters[ANSWER_LENGTH * currentRow + currentGuess.length].innerText = ""
+  }
+  
+  function setLoadingGif(isLoading){
+    loadingSpinner.classList.toggle('show',isLoading)
+  }
+  
+  function isLetter(letter){
+    return /^[a-zA-Z]$/.test(letter)
+  }
+  
+  function makeMap(array){
+    const obj = {}
+    for(let i=0;i<array.length;i++){
+      const letter = array[i]
+      if(obj[letter])
+        obj[letter]++
+      else
+      obj[letter] = 1
+    }
+    return obj;
+  }
+
+  function markInvalidWord(){
+    for(let i=0;i<ANSWER_LENGTH;i++){
+      letters[currentRow * ANSWER_LENGTH +i].classList.remove("invalid")
+      setTimeout(()=> { letters[currentRow * ANSWER_LENGTH +i].classList.add("invalid") },10)
+    }
   }
 
   document.addEventListener('keydown', function handleKeyPress(event) {
@@ -89,24 +136,5 @@ async function init() {
       addLetter(action.toUpperCase())
   })
 
-  function setLoadingGif(isLoading){
-    loadingSpinner.classList.toggle('show',isLoading)
-  }
-
-  function isLetter(letter){
-    return /^[a-zA-Z]$/.test(letter)
-  }
-
-  function makeMap(array){
-    const obj = {}
-    for(let i=0;i<array.length;i++){
-      const letter = array[i]
-      if(obj[letter])
-        obj[letter]++
-      else
-        obj[letter] = 1
-    }
-    return obj;
-  }
 }
 init()
