@@ -1,5 +1,8 @@
 const letters = document.querySelectorAll('.board-letter')
 const loadingSpinner = document.querySelector('.info-bar')
+const closeAlertBtn = document.querySelector('.close-alert-box')
+let alertBox = document.querySelector('.alert')
+let popUpMesseage = document.querySelector('.alert p')
 const ANSWER_LENGTH = 5
 const ROUNDS = 6
 
@@ -8,6 +11,7 @@ async function init() {
   let currentRow = 0
   let done = false
   let isLoading = true
+  let showPopUp = false
 
   // Fetching the word of the day from an API
   const response = await fetch("https://words.dev-apis.com/word-of-the-day")
@@ -16,7 +20,7 @@ async function init() {
   setLoadingGif(false)
   isLoading = false
   const wordParts = word.split("")
-  console.log(word)
+  // console.log(word)       Word of the day
 
   function addLetter(letter) {
     if(currentGuess.length < ANSWER_LENGTH)
@@ -65,7 +69,7 @@ async function init() {
       if(guessParts[i] === wordParts[i]){
         //Do nothing already did it.
       }
-      // Marking it as close
+      // Marking it as closer to the word
       else if(wordParts.includes(guessParts[i]) && map[guessParts[i]] > 0){
         letters[currentRow * ANSWER_LENGTH +i].classList.add("close")
         map[guessParts[i]]--
@@ -77,14 +81,19 @@ async function init() {
     currentRow++
     // Win or lose logic
     if(currentGuess === word){
-      // TODO : Add popups or notifications instead of alerts
-      
-      alert("You win 🥇")
+      // TODO : Add popup
+      showPopUp = true
+      alertBox.style.backgroundColor = '#bbf7d0'
+      popUpMesseage.innerHTML = "You win 🎉🎉🥇"
+      alertBox.classList.toggle('show',showPopUp)
       document.querySelector(".brand").classList.add("winner")
       done = true
       return
     }else if(currentRow === ROUNDS){
-      alert(`The word of the day was ${word}`)
+      showPopUp = true
+      alertBox.style.backgroundColor = '#fed7aa'
+      popUpMesseage.innerHTML = `Better Luck Next Time, the word of the day is ${word} 😞😔`
+      alertBox.classList.toggle('show',showPopUp)
       done = true 
     }
 
@@ -134,6 +143,13 @@ async function init() {
       backspace()
     else if(isLetter(action))
       addLetter(action.toUpperCase())
+  })
+
+  //Function to close alert box 
+  closeAlertBtn.addEventListener("click", ()=> {
+  let alert =  document.querySelector(".alert")
+  alert.style.opacity = "0"
+  setTimeout(()=>{ alert.style.display = "none"; }, 500);
   })
 
 }
